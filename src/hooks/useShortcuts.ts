@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import { getSelectedComponent } from '~core/selectors/components'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { fileSave } from 'browser-nativefs';
 
 const keyMap = {
   DELETE_NODE: 'Backspace, del',
@@ -10,6 +11,8 @@ const keyMap = {
   TOGGLE_CODE_PANEL: 'c',
   UNDO: 'ctrl+z, command+z',
   REDO: 'ctrl+y, cmd+y',
+  SAVE: 'shift+s',
+  LOAD: 'shift+t',
   UNSELECT: 'esc',
   PARENT: 'p',
   DUPLICATE: 'ctrl+d, command+d',
@@ -79,6 +82,22 @@ const useShortcuts = () => {
 
     dispatch.components.duplicate()
   }
+  const onSave = (event: KeyboardEvent | undefined) => {
+    if (event) {
+      event.preventDefault()
+    }
+    const serialized = JSON.stringify(dispatch.components)
+
+    localStorage.setItem('chakraSave',   serialized);
+
+  }
+  const onLoad = (event: KeyboardEvent | undefined) => {
+    if (event) {
+      event.preventDefault()
+    }
+
+   dispatch.components.reset( JSON.parse(localStorage.getItem('chakraSave') || '{}'))
+  }
 
   const onKonamiCode = () => {
     dispatch.components.loadDemo('secretchakra')
@@ -92,7 +111,9 @@ const useShortcuts = () => {
   useHotkeys(keyMap.UNSELECT, onUnselect)
   useHotkeys(keyMap.PARENT, onSelectParent)
   useHotkeys(keyMap.DUPLICATE, onDuplicate)
-  useHotkeys(keyMap.KONAMI_CODE, onKonamiCode)
+  useHotkeys(keyMap.SAVE, onSave)
+  useHotkeys(keyMap.LOAD, onLoad)
+ // useHotkeys(keyMap.KONAMI_CODE, onKonamiCode)
 }
 
 export default useShortcuts
